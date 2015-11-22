@@ -157,10 +157,11 @@ class ImageManager(base.ManagerWithFind):
         return utils.IterableWithLength(body, content_length)
 
     def _build_params(self, parameters):
-        params = {'limit': parameters.get('page_size', DEFAULT_PAGE_SIZE)}
+        params = {'limit': parameters.get('page_size') or DEFAULT_PAGE_SIZE}
 
-        if 'marker' in parameters:
-            params['marker'] = parameters['marker']
+        marker = parameters.get('marker')
+        if marker is not None:
+            params['marker'] = marker
 
         sort_key = parameters.get('sort_key')
         if sort_key is not None:
@@ -185,8 +186,10 @@ class ImageManager(base.ManagerWithFind):
         params.update(filters)
         if parameters.get('owner') is not None:
             params['is_public'] = None
-        if 'is_public' in parameters:
-            params['is_public'] = parameters['is_public']
+
+        is_public = parameters.get('is_public')
+        if is_public is not None:
+            params['is_public'] = is_public
 
         return params
 

@@ -449,6 +449,18 @@ class ImageManagerTest(testtools.TestCase):
         self.assertEqual('b', images[1].id)
         self.assertEqual('c', images[2].id)
 
+    def test_paginated_list_with_null_limit(self):
+        images = list(self.mgr.list(page_size=2, limit=None))
+        expect = [
+            ('GET', '/v1/images/detail?limit=2', {}, None),
+            ('GET', '/v1/images/detail?limit=2&marker=b', {}, None),
+        ]
+        self.assertEqual(expect, self.api.calls)
+        self.assertEqual(3, len(images))
+        self.assertEqual('a', images[0].id)
+        self.assertEqual('b', images[1].id)
+        self.assertEqual('c', images[2].id)
+
     def test_list_with_limit_less_than_page_size(self):
         results = list(self.mgr.list(page_size=2, limit=1))
         expect = [('GET', '/v1/images/detail?limit=2', {}, None)]
@@ -469,6 +481,12 @@ class ImageManagerTest(testtools.TestCase):
     def test_list_with_marker(self):
         list(self.mgr.list(marker='a'))
         url = '/v1/images/detail?limit=20&marker=a'
+        expect = [('GET', url, {}, None)]
+        self.assertEqual(expect, self.api.calls)
+
+    def test_list_with_null_marker(self):
+        list(self.mgr.list(marker=None))
+        url = '/v1/images/detail?limit=20'
         expect = [('GET', url, {}, None)]
         self.assertEqual(expect, self.api.calls)
 
